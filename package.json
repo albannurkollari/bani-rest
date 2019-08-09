@@ -1,0 +1,12 @@
+{
+  "name": "@bani/rest",
+  "version": "0.0.1",
+  "description": "My first MEAN stack try",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:albannurkollari/bani-rest.git"
+  },
+  "author": "Alban Nurkollari",
+  "license": "MIT"
+}
