@@ -1,7 +1,7 @@
-const mg = require('mongoose');
+const {model, Schema} = require('mongoose');
 
 // Schema
-module.exports = mg.model('Char', mg.Schema({
+module.exports = model('Char', Schema({
   name: {
     type: String,
     required: true
