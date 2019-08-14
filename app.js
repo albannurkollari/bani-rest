@@ -1,8 +1,12 @@
+// Libraries and enviromental configs
 require('dotenv/config');
 const ck = require('chalk');
 const ex = require('express');
 const fs = require('fs');
 const mg = require('mongoose');
+
+// Constants
+const METHODS = require('./constants/methods');
 
 // Error constants (code:message)
 const ERRORS = {
@@ -25,7 +29,7 @@ class AppError extends Error {
 const ROUTES_DIR = './routes';
 
 // Express requests class
-class Requests {
+class Router {
   constructor (app) {
 
     this.app = ex();
@@ -40,14 +44,30 @@ class Requests {
     // Initiate middlewares
     fs.readdirSync(ROUTES_DIR).map(file => {
       const _file = `/${file.replace(/\.js$/, '')}`;
+      const routes = require(`${ROUTES_DIR}${_file}`);
+      const router = ex.Router();
 
-      this.app.use(_file, require(`${ROUTES_DIR}${_file}`));
+      routes.forEach(([path, methods]) =>
+        Object
+          .entries(methods)
+          .forEach(([type, fn], i) => {
+            const method = METHODS[type];
+            const symbol = ck.hex('#1e90ff')(i + 1 === 2 ? '└┬┴┬┘' : '┌┴┬┴┐');
+            const message = `[Route]: ${ck.hex('#ffd36c')(method.toUpperCase())} ->`;
+            const fullPath = ck.hex('#6cfff9')(`${_file}${path}`);
+
+            router[method](path, fn);
+
+            console.log(`${symbol} ${message} ${fullPath}`)
+          }));
+
+      this.app.use(_file, router);
     });
   }
 }
 
 // Application class
-class App extends Requests {
+class App extends Router {
   port = 3000
 
   constructor (port) {
@@ -55,16 +75,24 @@ class App extends Requests {
 
     this.port = port || this.port;
     this.start = async () => {
-      await mg.connect(process.env.DB_CONNECTION, {useNewUrlParser: true}, err => {
-        if (err) {
-          console.log(ck`{inverse {red {bold ${err}}}}`);
-          throw new AppError(ERRORS[3000]);
-        }
+      const connectionParams = {
+        useCreateIndex: true,
+        useNewUrlParser: true
+      };
 
-        console.log(ck`{inverse Connected to Bani's hafty-nifty-handcrafted database}`);
-      });
+      try {
+        await mg.connect(process.env.DB_CONNECTION, connectionParams, err => {
+          if (err) {
+            console.log(ck`{inverse {red {bold ${err}}}}`);
+            throw new AppError(ERRORS[3000]);
+          }
 
-      this.app.listen(this.port, () => console.log(ck`{inverse {blue Listening to {green http://localholst:${this.port}}}}`));
+          console.log(ck`{inverse ${process.env.DB_CONNECTED_MSG}}`);
+        });
+
+        this.app.listen(this.port, () => console.log(ck`{inverse {blue Listening to {green http://localholst:${this.port}}}}`));
+      }
+      catch { /* Silent ignore */ }
     };
   }
 }
