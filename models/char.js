@@ -1,7 +1,6 @@
 const mg = require('mongoose');
 
 // Schema
-
 module.exports = mg.model('Char', mg.Schema({
   name: {
     type: String,
