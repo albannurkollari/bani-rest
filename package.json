@@ -1,12 +1,23 @@
 {
   "name": "@bani/rest",
   "version": "0.0.1",
-  "description": "My first MEAN stack try",
-  "main": "main.js",
+  "description": "A RESTful Node.js app",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:albannurkollari/bani-rest.git"
   },
   "author": "Alban Nurkollari",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon app.js",
+    "debug": "nodemon --inspect app.js"
+  },
+  "devDependencies": {
+    "chalk": "^2.4.2",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.6.9",
+    "nodemon": "^1.19.1"
+  }
 }
