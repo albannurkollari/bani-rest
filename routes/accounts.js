@@ -10,5 +10,19 @@ module.exports = [
   ['/:id', {
     GET: async ({params: {id}}, res) => res.json(await Account.findById(id)),
     PUT: async ({body}, res) => res.json(await Account(body).save())
+  }],
+  ['/:create', {
+    PUT: async ({body}, res) => {
+      const account = new Account({
+
+      });
+
+      try {
+        
+      }
+      catch {
+        // ignore for the moment being
+      }
+    }
   }]
 ];
