@@ -1,6 +1,19 @@
 const {model, Schema} = require('mongoose');
 
+const getDefaultName = () => ['John', 'Jane'][Math.round(Math.random())];
+const getDefaultSurname = () => ['Doe', 'Snow'][Math.round(Math.random())];
+
 module.exports = model('Account', Schema({
+  firstName: {
+    type: String,
+    required: true,
+    default: getDefaultName()
+  },
+  lastName: {
+    type: String,
+    required: true,
+    default: getDefaultSurname()
+  },
   email: {
     type: String,
     required: true,
