@@ -3,6 +3,7 @@ require('dotenv/config');
 const ck = require('chalk');
 const ex = require('express');
 const fs = require('fs');
+const jo = require('@hapi/joi');
 const mg = require('mongoose');
 
 // Constants
@@ -26,11 +27,15 @@ class AppError extends Error {
     this.stack = this.stack.replace(/^Error/, this.constructor.name);
   }
 }
-const ROUTES_DIR = './routes';
+
+const DIR = {
+  ROUTES: './routes',
+  VALIDATION: './validation'
+};
 
 // Express requests class
 class Router {
-  constructor (app) {
+  constructor () {
 
     this.app = ex();
 
@@ -41,24 +46,35 @@ class Router {
     this.app.use(ex.urlencoded({extended: true}));
     this.app.use(ex.json());
 
+    let i = 1;
+
     // Initiate middlewares
-    fs.readdirSync(ROUTES_DIR).map(file => {
+    fs.readdirSync(DIR.ROUTES).map(file => {
       const _file = `/${file.replace(/\.js$/, '')}`;
-      const routes = require(`${ROUTES_DIR}${_file}`);
+      const routes = require(`${DIR.ROUTES}${_file}`);
       const router = ex.Router();
 
       routes.forEach(([path, methods]) =>
         Object
           .entries(methods)
-          .forEach(([type, fn], i) => {
+          .forEach(([type, fn]) => {
             const method = METHODS[type];
-            const symbol = ck.hex('#1e90ff')(i + 1 === 2 ? '└┬┴┬┘' : '┌┴┬┴┐');
-            const message = `[Route]: ${ck.hex('#ffd36c')(method.toUpperCase())} ->`;
+            const symbol = ck.hex('#1e90ff')(i % 2 ? '└┬┴┬┘' : '┌┴┬┴┐');
+            const httpMethod = ck.hex('#ffd36c')(method.toUpperCase());
             const fullPath = ck.hex('#6cfff9')(`${_file}${path}`);
+
+            if (fs.existsSync(`${DIR.VALIDATION}/${file}`)) {
+              const validationFn = require(`${DIR.VALIDATION}/${file}`)[path];
+
+              if (validationFn instanceof Function) {
+                router[method](path, validationFn);
+              }
+            };
 
             router[method](path, fn);
 
-            console.log(`${symbol} ${message} ${fullPath}`)
+            console.log(`${symbol} ${ck.inverse(`[${i}]`)} -> {${httpMethod}} ${fullPath}`);
+            i++;
           }));
 
       this.app.use(_file, router);
