@@ -29,6 +29,7 @@ class AppError extends Error {
 }
 
 const DIR = {
+  AUTHORIZATION: './authorization',
   ROUTES: './routes',
   VALIDATION: './validation'
 };
@@ -62,6 +63,14 @@ class Router {
             const symbol = ck.hex('#1e90ff')(i % 2 ? '└┬┴┬┘' : '┌┴┬┴┐');
             const httpMethod = ck.hex('#ffd36c')(method.toUpperCase());
             const fullPath = ck.hex('#6cfff9')(`${_file}${path}`);
+
+            if (fs.existsSync(`${DIR.AUTHORIZATION}/${file}`)) {
+              const authorizationFn = require(`${DIR.AUTHORIZATION}/${file}`)[path];
+
+              if (authorizationFn instanceof Function) {
+                router[method](path, authorizationFn);
+              }
+            };
 
             if (fs.existsSync(`${DIR.VALIDATION}/${file}`)) {
               const validationFn = require(`${DIR.VALIDATION}/${file}`)[path];
